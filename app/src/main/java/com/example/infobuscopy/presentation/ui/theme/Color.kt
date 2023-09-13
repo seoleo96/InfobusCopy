@@ -1,4 +1,4 @@
-package com.example.infobuscopy.ui.theme
+package com.example.infobuscopy.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

@@ -1,4 +1,4 @@
-package com.example.infobuscopy.ui.theme
+package com.example.infobuscopy.presentation.ui.theme
 
 import android.app.Activity
 import android.os.Build
