@@ -8,9 +8,9 @@ class MainRepository(
     private val service: InfoBusService,
 ) {
 
-    suspend fun get14BusRoutes(): List<BusRouteModel>? {
+    suspend fun get14BusRoutes(routeId : Int): List<BusRouteModel>? {
         return try {
-            service.get14BusRoutes().apply {
+            service.get14BusRoutes(routeId).apply {
                 Log.e(TAG, "get14BusRoutes: $this")
             }
         } catch (e: Exception) {

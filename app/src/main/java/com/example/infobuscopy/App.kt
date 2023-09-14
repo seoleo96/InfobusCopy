@@ -4,6 +4,7 @@ import android.app.Application
 import com.example.infobuscopy.data.network.InfoBusService
 import com.example.infobuscopy.data.repository.MainRepository
 import com.example.infobuscopy.presentation.screens.MainViewModel
+import com.example.infobuscopy.util.LruCacheImpl
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -39,6 +40,7 @@ class App : Application() {
 
     private var uiModule = module {
         viewModelOf(::MainViewModel)
+        singleOf(::LruCacheImpl)
     }
 
     private val dataModule = module {

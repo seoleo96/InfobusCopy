@@ -12,32 +12,56 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 data class MainState(
-    val routes: List<BusRouteModel>,
-    val polyLines: List<LatLng>,
+    val routes14: List<BusRouteModel>,
+    val polyLines14: List<LatLng>,
+    val routes101: List<BusRouteModel>,
+    val polyLines101: List<LatLng>,
 )
 
 class MainViewModel(
     private val repository: MainRepository,
 ) : ViewModel() {
 
-    val mainState = MutableStateFlow(MainState(emptyList(), emptyList()))
+    val mainState = MutableStateFlow(MainState(emptyList(), emptyList(), emptyList(), emptyList()))
     val error = MutableStateFlow<Boolean>(false)
 
     init {
         Log.e(TAG, "repository : $repository ")
-        get14BusRoutes()
+        get14BusRoutes(244)
+//        get101BusRoutes(222)
     }
 
-    fun get14BusRoutes() {
+    fun get14BusRoutes(routeId : Int) {
         viewModelScope.launch(Dispatchers.IO) {
             while (true) {
-                val routes =  repository.get14BusRoutes()
+                val routes =  repository.get14BusRoutes(routeId)
                 Log.e(TAG, "get14BusRoutes: routes - $routes", )
                 if(routes != null){
                     routes.filter { busRouteModel ->
                         !busRouteModel.offline
                     }.let { busRouteModelList ->
-                        mainState.value = mainState.value.copy(routes = busRouteModelList, polyLines = get14Polyline())
+                        mainState.value = mainState.value.copy(routes14 = busRouteModelList, polyLines14 = get14Polyline())
+                        error.value = false
+                    }
+                } else{
+                    error.value = true
+                }
+                delay(5000)
+                error.value = false
+            }
+        }
+    }
+
+    fun get101BusRoutes(routeId : Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            while (true) {
+                val routes =  repository.get14BusRoutes(routeId)
+                Log.e(TAG, "get14BusRoutes: routes - $routes", )
+                if(routes != null){
+                    routes.filter { busRouteModel ->
+                        !busRouteModel.offline
+                    }.let { busRouteModelList ->
+                        mainState.value = mainState.value.copy(routes14 = busRouteModelList, polyLines14 = get14Polyline())
                         error.value = false
                     }
                 } else{
