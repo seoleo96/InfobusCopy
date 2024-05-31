@@ -1,18 +1,21 @@
 package com.example.infobuscopy.presentation.screens
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -23,7 +26,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.infobuscopy.R
 import com.example.infobuscopy.data.model.BusRouteModel
 import com.example.infobuscopy.util.LruCacheImpl
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -48,6 +54,8 @@ private const val TAG = "MainActivity"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(mainViewModel: MainViewModel = koinViewModel(), lruCacheImpl: LruCacheImpl = get()) {
+
+    val context = LocalContext.current
     val mainState = mainViewModel.mainState.collectAsState().value
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(Unit) {
@@ -60,19 +68,76 @@ fun MainScreen(mainViewModel: MainViewModel = koinViewModel(), lruCacheImpl: Lru
             }
         }
     }
+
+    if (mainState.routes14.isNotEmpty()) {
+        mainState.routes14.forEach { busRouteModel: BusRouteModel ->
+            val busNumber = "14"
+            lruCacheImpl.saveBitmapDescriptor(
+                context,
+                R.drawable.navigation_drop_blue,
+                busNumber,
+                busRouteModel.invalidAdapted,
+                busRouteModel.id.toString(),
+            )
+        }
+    }
+    if (mainState.routes101.isNotEmpty()) {
+        mainState.routes101.forEach { busRouteModel: BusRouteModel ->
+            val busNumber = "101"
+            lruCacheImpl.saveBitmapDescriptor(
+                context,
+                R.drawable.navigation_drop_red,
+                busNumber,
+                busRouteModel.invalidAdapted,
+                busRouteModel.id.toString(),
+            )
+        }
+    }
+
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    mainViewModel.visible101Buss()
+                }) {
+                Column(
+                    modifier = Modifier.padding(all = 0.dp)
+                ) {
+                    Text(text = "101", textAlign = TextAlign.Center)
+                    Checkbox(
+                        modifier = Modifier.padding(all = 0.dp),
+                        checked = mainState.visible101Buss,
+                        onCheckedChange = null
+                    )
+                }
+            }
         }
     ) {
-        MainContent(lruCacheImpl, mainState.routes14, mainState.polyLines14)
+        MainContent(
+            lruCacheImpl = lruCacheImpl,
+            routes14 = mainState.routes14,
+            polyLines14 = mainState.polyLines14,
+            routes101 = mainState.routes101,
+            polyLines101 = mainState.polyLines101,
+            visible101Buss = mainState.visible101Buss,
+        )
         it
     }
 }
 
 @Composable
-fun MainContent(lruCacheImpl: LruCacheImpl, routes: List<BusRouteModel>, polyLines: List<LatLng>) {
-    val cameraPositionLatLng = LatLng(routes.lastOrNull()?.lat ?: 54.90936, routes.lastOrNull()?.lon ?: 69.13374)
+fun MainContent(
+    lruCacheImpl: LruCacheImpl,
+    routes14: List<BusRouteModel>,
+    polyLines14: List<LatLng>,
+    routes101: List<BusRouteModel>,
+    polyLines101: List<LatLng>,
+    visible101Buss: Boolean,
+) {
+    val cameraPositionLatLng = LatLng(routes14.lastOrNull()?.lat ?: 54.90936, routes14.lastOrNull()?.lon ?: 69.13374)
     val cameraPositionState = rememberCameraPositionState {
         CameraPositionState(position = CameraPosition.fromLatLngZoom(cameraPositionLatLng, 11.5f))
     }
@@ -85,16 +150,12 @@ fun MainContent(lruCacheImpl: LruCacheImpl, routes: List<BusRouteModel>, polyLin
             ),
             durationMs = 1000
         )
-
-        while (true){
-            lruCacheImpl.getBitmapDescriptor().let {
-                Log.e("LruCache", "MainContent: $it")
-            }
-            delay(2000)
-        }
     }
 
-    val icon = remember {
+    val icon14 = remember {
+        mutableStateOf<BitmapDescriptor?>(null)
+    }
+    val icon101 = remember {
         mutableStateOf<BitmapDescriptor?>(null)
     }
     Box {
@@ -102,25 +163,50 @@ fun MainContent(lruCacheImpl: LruCacheImpl, routes: List<BusRouteModel>, polyLin
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
             onMapLoaded = {
-                icon.value = lruCacheImpl.getBitmapDescriptor()?.let {
+                icon14.value = lruCacheImpl.getBitmapDescriptor("14")?.let {
+                    BitmapDescriptorFactory.fromBitmap(it)
+                }
+                icon101.value = lruCacheImpl.getBitmapDescriptor("101")?.let {
                     BitmapDescriptorFactory.fromBitmap(it)
                 }
             }
         ) {
             Polyline(
-                points = polyLines, color = Color.Blue, visible = true, width = 6f, startCap = RoundCap()
+                points = polyLines14, color = Color.Blue, visible = true, width = 6f, startCap = RoundCap()
             )
-            routes.forEach {
+            routes14.forEach { busRouteModel ->
+                val latLong = LatLng(busRouteModel.lat, busRouteModel.lon)
                 Marker(
-                    state = MarkerState(position = LatLng(it.lat, it.lon)),
-                    title = it.name,
-                    rotation = it.direction.toFloat(),
-                    icon = icon.value,
-                    visible = icon.value != null
+                    state = MarkerState(position = latLong),
+                    title = busRouteModel.name,
+                    rotation = busRouteModel.direction.toFloat(),
+                    icon = lruCacheImpl.getBitmapDescriptor(busRouteModel.id.toString())?.let { bitmap ->
+                        BitmapDescriptorFactory.fromBitmap(bitmap)
+                    },
+                    visible = true
                 )
             }
+
+            if (visible101Buss) {
+                Polyline(
+                    points = polyLines101, color = Color.Green, visible = true, width = 6f, startCap = RoundCap()
+                )
+                routes101.forEach { busRouteModel ->
+                    val latLong = LatLng(busRouteModel.lat, busRouteModel.lon)
+                    Marker(
+                        state = MarkerState(position = latLong),
+                        title = busRouteModel.name,
+                        rotation = busRouteModel.direction.toFloat(),
+                        icon = lruCacheImpl.getBitmapDescriptor(busRouteModel.id.toString())?.let { bitmap ->
+                            BitmapDescriptorFactory.fromBitmap(bitmap)
+                        },
+                        visible = true
+                    )
+                }
+            }
         }
-        AnimatedVisibility(visible = routes.isEmpty()) {
+
+        AnimatedVisibility(visible = routes14.isEmpty()) {
             Box(
                 modifier = Modifier
                     .background(color = Color.Gray.copy(alpha = 0.3f))

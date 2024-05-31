@@ -27,6 +27,12 @@ android {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
+        debug {
+            release {
+                isMinifyEnabled = false
+                proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            }
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -44,6 +50,14 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+    signingConfigs {
+        create("release") {
+            keyAlias = "release"
+            keyPassword = "keyPassword"
+            storeFile = file("storeFile")
+            storePassword = "storePassword"
         }
     }
 }
@@ -76,7 +90,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.1")
 
-    implementation ("io.insert-koin:koin-core:3.3.2")
-    implementation ("io.insert-koin:koin-android:3.3.2")
-    implementation ("io.insert-koin:koin-androidx-compose:3.4.1")
+    implementation("io.insert-koin:koin-core:3.3.2")
+    implementation("io.insert-koin:koin-android:3.3.2")
+    implementation("io.insert-koin:koin-androidx-compose:3.4.1")
 }

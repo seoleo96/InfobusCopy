@@ -2,11 +2,11 @@ package com.example.infobuscopy.util
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.Paint
 import android.util.Log
 import android.util.LruCache
 import androidx.core.content.ContextCompat
-import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 
 class LruCacheImpl {
 
@@ -14,31 +14,55 @@ class LruCacheImpl {
         LruCache<String, Bitmap?>(1024)
     }
 
-    fun saveBitmapDescriptor(context: Context, vectorResId: Int) {
-        val bitmapDescriptor = lruCache.get("bitmap_image")
-        Log.e(TAG, "saveBitmapDescriptor: ${bitmapDescriptor == null}")
-        if(bitmapDescriptor != null){
-            return
-        }
+    fun saveBitmapDescriptor(context: Context, vectorResId: Int, busNumber: String, invalidAdapted: Boolean, cacheName : String) {
         val drawable = ContextCompat.getDrawable(context, vectorResId) ?: return
-        drawable.setBounds(0, 0, 80, 80)
+        drawable.setBounds(60, 0, 160, 100)
         val bitmap = Bitmap.createBitmap(
-            80,
-            80,
+            if(invalidAdapted) 200 else 124,
+            100,
             Bitmap.Config.ARGB_8888
         )
         val canvas = android.graphics.Canvas(bitmap)
+        val paintContent = Paint(Paint.ANTI_ALIAS_FLAG)
+        val paintStroke = Paint(Paint.ANTI_ALIAS_FLAG)
+        val paintText = Paint(Paint.ANTI_ALIAS_FLAG)
+        paintContent.color = Color.BLACK
+        paintContent.style = Paint.Style.FILL
+        paintStroke.strokeWidth = 4f
+        paintStroke.color = Color.WHITE
+        paintStroke.style = Paint.Style.FILL
+        paintText.textSize = 24f
+        paintText.color = Color.BLACK
+        canvas.drawRoundRect(
+            44f,
+            26f,
+            if(invalidAdapted) 194f else 124f,
+            84f,
+            44f,
+            44f,
+            paintContent
+        )
+        canvas.drawRoundRect(
+            40f,
+            30f,
+            if(invalidAdapted) 190f else 120f,
+            80f,
+            40f,
+            40f,
+            paintStroke
+        )
+        val busNumberAndInvalidAdapted = if(invalidAdapted) "$busNumber | new" else "$busNumber"
+        canvas.drawText(busNumberAndInvalidAdapted, 80f, 64f, paintText)
         drawable.draw(canvas)
-        Log.e(TAG, "saveBitmapDescriptor SAVED DONE: ${bitmapDescriptor == null}")
-        lruCache.put("bitmap_image", bitmap).also {
-            Log.d(TAG, "saveBitmapDescriptor: $it")
+        lruCache.put(cacheName, bitmap).also {
+            Log.d(TAG, "saveBitmapDescriptor: ${it == null}")
         }
     }
 
-    var count = 0
-    fun getBitmapDescriptor(): Bitmap? {
-        val bitmapDescriptor = lruCache.get("bitmap_image")
-        Log.e(TAG, "getBitmapDescriptor: ${++count} $bitmapDescriptor", )
+    private var count = 0
+    fun getBitmapDescriptor(busNumber: String): Bitmap? {
+        val bitmapDescriptor = lruCache.get(busNumber)
+        Log.e(TAG, "getBitmapDescriptor: ${++count} $bitmapDescriptor")
         return bitmapDescriptor
     }
 

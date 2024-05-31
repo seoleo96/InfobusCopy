@@ -1,6 +1,7 @@
 package com.example.infobuscopy.presentation.screens
 
 import android.util.Log
+import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.infobuscopy.data.model.BusRouteModel
@@ -16,34 +17,40 @@ data class MainState(
     val polyLines14: List<LatLng>,
     val routes101: List<BusRouteModel>,
     val polyLines101: List<LatLng>,
+    val visible101Buss : Boolean
 )
 
 class MainViewModel(
     private val repository: MainRepository,
 ) : ViewModel() {
 
-    val mainState = MutableStateFlow(MainState(emptyList(), emptyList(), emptyList(), emptyList()))
+    val mainState = MutableStateFlow(MainState(emptyList(), emptyList(), emptyList(), emptyList(), false))
     val error = MutableStateFlow<Boolean>(false)
 
     init {
         Log.e(TAG, "repository : $repository ")
-        get14BusRoutes(244)
-//        get101BusRoutes(222)
+        get14BusRoutes()
+        get101BusRoutes()
     }
 
-    fun get14BusRoutes(routeId : Int) {
+    fun visible101Buss(){
+        mainState.value = mainState.value.copy(visible101Buss = !mainState.value.visible101Buss)
+    }
+
+    private fun get14BusRoutes() {
         viewModelScope.launch(Dispatchers.IO) {
             while (true) {
-                val routes =  repository.get14BusRoutes(routeId)
-                Log.e(TAG, "get14BusRoutes: routes - $routes", )
-                if(routes != null){
-                    routes.filter { busRouteModel ->
+                val routes = repository.get14BusRoutes(24)
+                Log.e(TAG, "get14BusRoutes: routes - $routes")
+                if (routes != null) {
+                    routes.filter { busRouteModel: BusRouteModel ->
                         !busRouteModel.offline
                     }.let { busRouteModelList ->
+                        Log.d(TAG, "get14BusRoutes:busRouteModelList $busRouteModelList ")
                         mainState.value = mainState.value.copy(routes14 = busRouteModelList, polyLines14 = get14Polyline())
                         error.value = false
                     }
-                } else{
+                } else {
                     error.value = true
                 }
                 delay(5000)
@@ -52,19 +59,19 @@ class MainViewModel(
         }
     }
 
-    fun get101BusRoutes(routeId : Int) {
+    private fun get101BusRoutes() {
         viewModelScope.launch(Dispatchers.IO) {
             while (true) {
-                val routes =  repository.get14BusRoutes(routeId)
-                Log.e(TAG, "get14BusRoutes: routes - $routes", )
-                if(routes != null){
+                val routes = repository.get14BusRoutes(16)
+                Log.e(TAG, "get101BusRoutes: routes - $routes")
+                if (routes != null) {
                     routes.filter { busRouteModel ->
                         !busRouteModel.offline
                     }.let { busRouteModelList ->
-                        mainState.value = mainState.value.copy(routes14 = busRouteModelList, polyLines14 = get14Polyline())
+                        mainState.value = mainState.value.copy(routes101 = busRouteModelList, polyLines101 = get101Polyline())
                         error.value = false
                     }
-                } else{
+                } else {
                     error.value = true
                 }
                 delay(5000)
@@ -490,6 +497,310 @@ class MainViewModel(
             LatLng(69.13359, 54.90917),
             LatLng(69.13374, 54.90926),
             LatLng(69.13375, 54.90936)
+        ).map {
+            LatLng(it.longitude, it.latitude)
+        }
+    }
+
+    private fun get101Polyline(): List<LatLng> {
+        return listOf<LatLng>(
+            LatLng(
+                69.17249, 54.85682
+            ),
+            LatLng(69.17237, 54.85674),
+            LatLng(69.17224, 54.85672),
+            LatLng(69.17181, 54.85671),
+            LatLng(69.17166, 54.85691),
+            LatLng(69.17144, 54.85918),
+            LatLng(69.16577, 54.85904),
+            LatLng(69.16577, 54.85904),
+            LatLng(69.15800, 54.85885),
+            LatLng(69.15800, 54.85885),
+            LatLng(69.15695, 54.85882),
+            LatLng(69.15135, 54.86231),
+            LatLng(69.15135, 54.86231),
+            LatLng(69.14833, 54.86415),
+            LatLng(69.14833, 54.86415),
+            LatLng(69.14416, 54.86671),
+            LatLng(69.14486, 54.86707),
+            LatLng(69.14486, 54.86707),
+            LatLng(69.14800, 54.86873),
+            LatLng(69.14530, 54.87036),
+            LatLng(69.14268, 54.87200),
+            LatLng(69.14268, 54.87200),
+            LatLng(69.14006, 54.87364),
+            LatLng(69.14006, 54.87364),
+            LatLng(69.13507, 54.87676),
+            LatLng(69.13507, 54.87676),
+            LatLng(69.13393, 54.87747),
+            LatLng(69.13124, 54.87606),
+            LatLng(69.13124, 54.87606),
+            LatLng(69.12824, 54.87446),
+            LatLng(69.12922, 54.87384),
+            LatLng(69.12922, 54.87384),
+            LatLng(69.13321, 54.87137),
+            LatLng(69.13321, 54.87137),
+            LatLng(69.13385, 54.87096),
+            LatLng(69.13085, 54.86935),
+            LatLng(69.13085, 54.86935),
+            LatLng(69.12735, 54.86747),
+            LatLng(69.12735, 54.86747),
+            LatLng(69.12240, 54.86481),
+            LatLng(69.12240, 54.86481),
+            LatLng(69.12064, 54.86387),
+            LatLng(69.12102, 54.86363),
+            LatLng(69.12102, 54.86363),
+            LatLng(69.12503, 54.86109),
+            LatLng(69.12503, 54.86109),
+            LatLng(69.12619, 54.86035),
+            LatLng(69.12155, 54.85788),
+            LatLng(69.12155, 54.85788),
+            LatLng(69.11668, 54.85528),
+            LatLng(69.11668, 54.85528),
+            LatLng(69.11195, 54.85276),
+            LatLng(69.11195, 54.85276),
+            LatLng(69.10748, 54.85038),
+            LatLng(69.10748, 54.85038),
+            LatLng(69.10668, 54.85002),
+            LatLng(69.10594, 54.84960),
+            LatLng(69.10575, 54.84945),
+            LatLng(69.10568, 54.84936),
+            LatLng(69.10562, 54.84926),
+            LatLng(69.10559, 54.84888),
+            LatLng(69.10554, 54.84873),
+            LatLng(69.10552, 54.84857),
+            LatLng(69.10554, 54.84838),
+            LatLng(69.10558, 54.84821),
+            LatLng(69.10564, 54.84804),
+            LatLng(69.10578, 54.84783),
+            LatLng(69.10633, 54.84718),
+            LatLng(69.10661, 54.84687),
+            LatLng(69.10693, 54.84653),
+            LatLng(69.10727, 54.84626),
+            LatLng(69.10766, 54.84603),
+            LatLng(69.10809, 54.84579),
+            LatLng(69.10877, 54.84552),
+            LatLng(69.10967, 54.84522),
+            LatLng(69.11276, 54.84411),
+            LatLng(69.11276, 54.84411),
+            LatLng(69.11632, 54.84283),
+            LatLng(69.11641, 54.84273),
+            LatLng(69.11647, 54.84268),
+            LatLng(69.11651, 54.84260),
+            LatLng(69.11649, 54.84252),
+            LatLng(69.11650, 54.84246),
+            LatLng(69.11656, 54.84237),
+            LatLng(69.11656, 54.84237),
+            LatLng(69.11673, 54.84232),
+            LatLng(69.11686, 54.84231),
+            LatLng(69.11696, 54.84235),
+            LatLng(69.11713, 54.84252),
+            LatLng(69.11797, 54.84221),
+            LatLng(69.11851, 54.84196),
+            LatLng(69.11902, 54.84168),
+            LatLng(69.11956, 54.84123),
+            LatLng(69.11979, 54.84095),
+            LatLng(69.11996, 54.84065),
+            LatLng(69.12032, 54.83983),
+            LatLng(69.12095, 54.83817),
+            LatLng(69.12188, 54.83568),
+            LatLng(69.12210, 54.83476),
+            LatLng(69.12223, 54.83382),
+            LatLng(69.12246, 54.83196),
+            LatLng(69.12246, 54.83196),
+            LatLng(69.12261, 54.83066),
+            LatLng(69.12272, 54.82941),
+            LatLng(69.12268, 54.82921),
+            LatLng(69.12263, 54.82906),
+            LatLng(69.12225, 54.82855),
+            LatLng(69.12223, 54.82847),
+            LatLng(69.12230, 54.82792),
+            LatLng(69.12245, 54.82764),
+            LatLng(69.12311, 54.82671),
+            LatLng(69.12327, 54.82552),
+            LatLng(69.12345, 54.82472),
+            LatLng(69.12375, 54.82257),
+            LatLng(69.12385, 54.82165),
+            LatLng(69.12388, 54.82073),
+            LatLng(69.12380, 54.81989),
+            LatLng(69.12209, 54.81452),
+            LatLng(69.12028, 54.80918),
+            LatLng(69.11225, 54.79253),
+            LatLng(69.11225, 54.79253),
+            LatLng(69.11046, 54.78881),
+            LatLng(69.11046, 54.78881),
+            LatLng(69.10857, 54.78486),
+            LatLng(69.10857, 54.78486),
+            LatLng(69.10506, 54.77755),
+            LatLng(69.10285, 54.77787),
+            LatLng(69.10285, 54.77787),
+            LatLng(69.10033, 54.77823),
+            LatLng(69.10033, 54.77823),
+            LatLng(69.09902, 54.77842),
+            LatLng(69.09884, 54.77849),
+            LatLng(69.09841, 54.77879),
+            LatLng(69.09823, 54.77886),
+            LatLng(69.09511, 54.77940),
+            LatLng(69.09511, 54.77940),
+            LatLng(69.09411, 54.77957),
+            LatLng(69.09281, 54.77701),
+            LatLng(69.09266, 54.77689),
+            LatLng(69.09249, 54.77683),
+            LatLng(69.08888, 54.77670),
+            LatLng(69.08888, 54.77670),
+            LatLng(69.08831, 54.77668),
+            LatLng(69.08831, 54.77622),
+            LatLng(69.08819, 54.77589),
+            LatLng(69.08802, 54.77562),
+            LatLng(69.08783, 54.77414),
+            LatLng(69.08783, 54.77414),
+            LatLng(69.08743, 54.77092),
+            LatLng(69.08743, 54.77092),
+            LatLng(69.08742, 54.77083),
+            LatLng(69.09305, 54.77026),
+            LatLng(69.09305, 54.77026),
+            LatLng(69.10003, 54.76955),
+            LatLng(69.10003, 54.76955),
+            LatLng(69.10117, 54.76943),
+            LatLng(69.09883, 54.76455),
+            LatLng(69.09863, 54.76426),
+            LatLng(69.09854, 54.76419),
+            LatLng(69.09849, 54.76411),
+            LatLng(69.09852, 54.76406),
+            LatLng(69.09860, 54.76404),
+            LatLng(69.09868, 54.76404),
+            LatLng(69.09875, 54.76408),
+            LatLng(69.09875, 54.76415),
+            LatLng(69.09874, 54.76425),
+            LatLng(69.09877, 54.76440),
+            LatLng(69.09877, 54.76440),
+            LatLng(69.09963, 54.76620),
+            LatLng(69.09963, 54.76620),
+            LatLng(69.10533, 54.77811),
+            LatLng(69.10533, 54.77811),
+            LatLng(69.10814, 54.78397),
+            LatLng(69.10814, 54.78397),
+            LatLng(69.11047, 54.78883),
+            LatLng(69.11047, 54.78883),
+            LatLng(69.11284, 54.79376),
+            LatLng(69.11284, 54.79376),
+            LatLng(69.12028, 54.80918),
+            LatLng(69.12184, 54.81377),
+            LatLng(69.12254, 54.81595),
+            LatLng(69.12380, 54.81989),
+            LatLng(69.12388, 54.82066),
+            LatLng(69.12385, 54.82167),
+            LatLng(69.12378, 54.82237),
+            LatLng(69.12356, 54.82387),
+            LatLng(69.12342, 54.82558),
+            LatLng(69.12288, 54.82965),
+            LatLng(69.12288, 54.82965),
+            LatLng(69.12236, 54.83366),
+            LatLng(69.12221, 54.83478),
+            LatLng(69.12211, 54.83527),
+            LatLng(69.12199, 54.83570),
+            LatLng(69.12167, 54.83653),
+            LatLng(69.12121, 54.83778),
+            LatLng(69.12026, 54.84029),
+            LatLng(69.12009, 54.84064),
+            LatLng(69.11990, 54.84097),
+            LatLng(69.11956, 54.84137),
+            LatLng(69.11911, 54.84172),
+            LatLng(69.11857, 54.84202),
+            LatLng(69.11799, 54.84227),
+            LatLng(69.11680, 54.84273),
+            LatLng(69.11680, 54.84273),
+            LatLng(69.11237, 54.84433),
+            LatLng(69.11237, 54.84433),
+            LatLng(69.10886, 54.84560),
+            LatLng(69.10831, 54.84583),
+            LatLng(69.10778, 54.84609),
+            LatLng(69.10741, 54.84633),
+            LatLng(69.10709, 54.84660),
+            LatLng(69.10585, 54.84805),
+            LatLng(69.10581, 54.84814),
+            LatLng(69.10579, 54.84821),
+            LatLng(69.10578, 54.84829),
+            LatLng(69.10580, 54.84835),
+            LatLng(69.10583, 54.84843),
+            LatLng(69.10589, 54.84850),
+            LatLng(69.10596, 54.84855),
+            LatLng(69.10606, 54.84860),
+            LatLng(69.10621, 54.84867),
+            LatLng(69.10640, 54.84878),
+            LatLng(69.10649, 54.84891),
+            LatLng(69.10643, 54.84908),
+            LatLng(69.10635, 54.84927),
+            LatLng(69.10624, 54.84945),
+            LatLng(69.10618, 54.84956),
+            LatLng(69.10618, 54.84963),
+            LatLng(69.10620, 54.84969),
+            LatLng(69.10626, 54.84975),
+            LatLng(69.10636, 54.84983),
+            LatLng(69.10671, 54.85003),
+            LatLng(69.10794, 54.85062),
+            LatLng(69.10794, 54.85062),
+            LatLng(69.11096, 54.85223),
+            LatLng(69.11096, 54.85223),
+            LatLng(69.11410, 54.85391),
+            LatLng(69.11410, 54.85391),
+            LatLng(69.11786, 54.85591),
+            LatLng(69.11785, 54.85591),
+            LatLng(69.12145, 54.85783),
+            LatLng(69.12145, 54.85783),
+            LatLng(69.12619, 54.86035),
+            LatLng(69.12550, 54.86079),
+            LatLng(69.12550, 54.86079),
+            LatLng(69.12064, 54.86387),
+            LatLng(69.12304, 54.86515),
+            LatLng(69.12304, 54.86515),
+            LatLng(69.12656, 54.86705),
+            LatLng(69.12656, 54.86705),
+            LatLng(69.13154, 54.86972),
+            LatLng(69.13154, 54.86972),
+            LatLng(69.13385, 54.87096),
+            LatLng(69.13194, 54.87215),
+            LatLng(69.13194, 54.87215),
+            LatLng(69.12874, 54.87414),
+            LatLng(69.12874, 54.87414),
+            LatLng(69.12824, 54.87446),
+            LatLng(69.13141, 54.87615),
+            LatLng(69.13141, 54.87615),
+            LatLng(69.13393, 54.87747),
+            LatLng(69.13483, 54.87691),
+            LatLng(69.13483, 54.87691),
+            LatLng(69.13752, 54.87523),
+            LatLng(69.13752, 54.87523),
+            LatLng(69.14004, 54.87366),
+            LatLng(69.14004, 54.87366),
+            LatLng(69.14352, 54.87148),
+            LatLng(69.14352, 54.87148),
+            LatLng(69.14800, 54.86873),
+            LatLng(69.14593, 54.86762),
+            LatLng(69.14593, 54.86762),
+            LatLng(69.14416, 54.86671),
+            LatLng(69.14610, 54.86551),
+            LatLng(69.14610, 54.86551),
+            LatLng(69.15042, 54.86289),
+            LatLng(69.15042, 54.86289),
+            LatLng(69.15311, 54.86121),
+            LatLng(69.15311, 54.86121),
+            LatLng(69.15695, 54.85882),
+            LatLng(69.15906, 54.85887),
+            LatLng(69.15906, 54.85887),
+            LatLng(69.16504, 54.85902),
+            LatLng(69.16504, 54.85902),
+            LatLng(69.16755, 54.85908),
+            LatLng(69.16838, 54.85814),
+            LatLng(69.16866, 54.85773),
+            LatLng(69.17009, 54.85777),
+            LatLng(69.17009, 54.85777),
+            LatLng(69.17156, 54.85782),
+            LatLng(69.17166, 54.85691),
+            LatLng(69.17181, 54.85671),
+            LatLng(69.17224, 54.85672),
+            LatLng(69.17237, 54.85674),
+            LatLng(69.17249, 54.85682)
         ).map {
             LatLng(it.longitude, it.latitude)
         }

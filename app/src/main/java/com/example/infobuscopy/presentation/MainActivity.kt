@@ -18,8 +18,6 @@ import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
 
-    private val lruCacheImpl : LruCacheImpl by inject()
-
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,9 +34,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-        Log.e("LruCache", "onCreate: saveBitmapDescriptor", )
-        lruCacheImpl.saveBitmapDescriptor(this, R.drawable.navigation_drop_blue)
-
     }
 }
 
